@@ -83,12 +83,12 @@ BEGIN
 		select top 1 @alg = algorithm from #hashAlg where processed = @minProcessed;
 		
 		--Dummy output table
-		declare @output as table ( o varbinary(8000) );
+		declare @outputCLR as table ( o varbinary(8000) );
 
 		--Save off 'before' CPU stats
 		select @startCpu = cpu_time from sys.dm_exec_requests where session_id = @@SPID;
 
-		insert into @output
+		insert into @outputCLR
 		select dbo.GetHash(@alg,convert(varbinary(max),Value)) from dbo.TestValuesHybrid;
 
 		--Calculate total CPU stats and save to table
@@ -117,10 +117,10 @@ BEGIN
 
 		select top 1 @alg = algorithm from #hashAlg where processed = @minProcessed;
 		
-		declare @outputCLR as table ( o varbinary(8000) );
+		declare @outputHybrid as table ( o varbinary(8000) );
 
 		select @startCpu = cpu_time from sys.dm_exec_requests where session_id = @@SPID;
-		insert into @outputCLR
+		insert into @outputHybrid
 		select dbo.GetHashHybrid(@alg,convert(varbinary(max),Value)) from dbo.TestValuesHybrid;
 
 		insert into #hashResult
