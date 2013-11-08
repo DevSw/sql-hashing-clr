@@ -133,6 +133,37 @@ BEGIN
 	END
 END
 
+--reset algorithms for next test
+update #hashAlg set processed = 0;
+
+/*****Run tests on Hybrid*****/
+while exists (Select 1 from #hashAlg where processed <> @processGoal)
+BEGIN
+
+	select @minProcessed = min(processed) from #hashAlg;
+
+	while exists (select 1 from #hashAlg where processed <> (@minProcessed + 1))
+	BEGIN
+
+		select top 1 @alg = algorithm from #hashAlg where processed = @minProcessed;
+		
+		declare @outputHybrid as table ( o varbinary(8000) );
+
+		select @startCpu = cpu_time from sys.dm_exec_requests where session_id = @@SPID;
+		insert into @outputHybrid
+		select dbo.GetHashHybrid(@alg,convert(varbinary(max),Value)) from dbo.TestValuesSub8000;
+
+		insert into #hashResult
+		select 'Hybrid_' + @alg, cpu_time - @startCpu from sys.dm_exec_requests where session_id = @@SPID;
+
+		update h 
+		set h.processed = h.processed + 1 
+		from #hashAlg h 
+		where h.algorithm = @alg;
+
+	END
+END
+
 /*****Get stats*****/
 /*	Since SQL doesn't have a built-in median function, we can
 	use the ranking functions to determine the middle row.
