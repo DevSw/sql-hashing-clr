@@ -61,7 +61,7 @@ if OBJECT_ID('tempdb..#hashResult') is not null
 	drop table #hashResult;
 create table #hashResult
 (
-	algorithm varchar(13),
+	algorithm varchar(20),
 	cpu bigint
 );
 
