@@ -56,20 +56,6 @@ select 'SHA1',0 union all
 select 'SHA2_256',0 union all
 select 'SHA2_512',0;
 
-if OBJECT_ID('tempdb..#hashAlgCLR') is not null
-	drop table #hashAlgCLR;
-create table #hashAlgCLR
-(
-	algorithm varchar(8),
-	processed int
-);
-
-Insert into #hashAlgCLR
-select 'MD5',0 union all
-select 'SHA1',0 union all
-select 'SHA256',0 union all
-select 'SHA512',0;
-
 if OBJECT_ID('tempdb..#hashResult') is not null
 	drop table #hashResult;
 create table #hashResult
@@ -102,7 +88,7 @@ BEGIN
 		select @startCpu = cpu_time from sys.dm_exec_requests where session_id = @@SPID;
 
 		insert into @output
-		select hashbytes(@alg,Value) from dbo.TestValuesSub8000;
+		select hashbytes(@alg,convert(varbinary(max),Value)) from dbo.TestValuesSub8000;
 
 		--Calculate total CPU stats and save to table
 		insert into #hashResult
@@ -116,16 +102,19 @@ BEGIN
 	END
 END
 
+--reset algorithms for next test
+update #hashAlg set processed = 0;
+
 /*****Run tests on CLR*****/
-while exists (Select 1 from #hashAlgCLR where processed <> @processGoal)
+while exists (Select 1 from #hashAlg where processed <> @processGoal)
 BEGIN
 
-	select @minProcessed = min(processed) from #hashAlgCLR;
+	select @minProcessed = min(processed) from #hashAlg;
 
-	while exists (select 1 from #hashAlgCLR where processed <> (@minProcessed + 1))
+	while exists (select 1 from #hashAlg where processed <> (@minProcessed + 1))
 	BEGIN
 
-		select top 1 @alg = algorithm from #hashAlgCLR where processed = @minProcessed;
+		select top 1 @alg = algorithm from #hashAlg where processed = @minProcessed;
 		
 		declare @outputCLR as table ( o varbinary(8000) );
 
@@ -138,7 +127,7 @@ BEGIN
 
 		update h 
 		set h.processed = h.processed + 1 
-		from #hashAlgCLR h 
+		from #hashAlg h 
 		where h.algorithm = @alg;
 
 	END

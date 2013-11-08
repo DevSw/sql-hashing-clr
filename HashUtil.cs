@@ -17,10 +17,10 @@ public class HashUtil
                 return new SqlBinary(MD5.Create().ComputeHash(src.Stream));
             case "SHA1":
                 return new SqlBinary(SHA1.Create().ComputeHash(src.Stream));
-            case "SHA256":
-                return new SqlBinary(SHA256.Create().ComputeHash(src.Stream));
-            case "SHA512":
-                return new SqlBinary(SHA512.Create().ComputeHash(src.Stream));
+            case "SHA2_256":
+                    return new SqlBinary(SHA256.Create().ComputeHash(src.Stream));
+            case "SHA2_512":
+                    return new SqlBinary(SHA512.Create().ComputeHash(src.Stream));
             default:
                 throw new ArgumentException("HashType", "Unrecognized hashtype: " + algorithm.Value);
         }
