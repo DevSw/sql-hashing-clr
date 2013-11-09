@@ -9,8 +9,8 @@ The actual CLR class.
 ###GetHashHybrid.function.sql
 The function that either calls SQL Server's HASHBYTES() function or the CLR based on the length of the input.
 
-###benchmark-clr.script.sql
-This script evaluates the CPU usage of the CLR vs. HASHBYTES(). Detailed information can be found in the comments for the script.
+###benchmark-under8000.script.sql
+This script evaluates the CPU usage of HASHBYTES(), the CLR, and the hybrid function using inputs under 8000 bytes. Detailed information can be found in the comments for the script.
 
-###benchmark-hybrid.script.sql
-This script evaluates the CPU usage of the CLR vs. the hybrid function which uses a combination of the CLR and HASHBYTES(). Detailed information can be found in the script.
+###benchmark-over8000.script.sql
+This script evaluates the CPU usage of the CLR vs. the hybrid function using inputes both under and over 8000 bytes. Detailed information can be found in the script.
