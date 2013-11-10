@@ -172,7 +172,7 @@ select
 	h.algorithm
 ,	AVG(h.cpu) as cpuAverage
 ,	c.cpu as cpuMedian
-,	STDEV(h.cpu) as cpuStd_dev
+,	CAST(STDEV(h.cpu) as int) as cpuStd_dev
 from #hashResult h
 	inner join
 		(Select 
