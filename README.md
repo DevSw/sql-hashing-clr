@@ -10,7 +10,7 @@ The actual CLR class.
 The function that either calls SQL Server's HASHBYTES() function or the CLR based on the length of the input.
 
 ###benchmark-under8000.script.sql
-This script evaluates the CPU usage of HASHBYTES(), the CLR, and the hybrid function using inputs under 8000 bytes. Detailed information can be found in the comments for the script.
+This script evaluates the CPU usage of HASHBYTES(), the CLR, the hybrid function, and fn_repl_hash_binary using inputs under 8000 bytes. Detailed information can be found in the comments of the script.
 
 ###benchmark-over8000.script.sql
-This script evaluates the CPU usage of the CLR vs. the hybrid function using inputes both under and over 8000 bytes. Detailed information can be found in the script.
+This script evaluates the CPU usage of the CLR, the hybrid function, and fn_repl_hash_binary using inputes both under and over 8000 bytes. Detailed information can be found in the comments of the script.

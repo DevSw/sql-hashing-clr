@@ -1,7 +1,8 @@
-/*	This script evaluates the CPU usage of the CLR vs. HASHBYTES().
-	We create a table of test values of varying length under 8000
-	bytes, run both functions over the test table many times with
-	each common hashing algorithm, and save off the CPU time.
+/*	This script evaluates the CPU usage of the CLR vs. HASHBYTES()
+	vs. fn_repl_hash_binary. We create a table of test values of 
+	varying length under 8000 bytes, run both functions over the 
+	test table many times with each common hashing algorithm, and 
+	save off the CPU time.
 */
 
 set nocount on;
@@ -155,6 +156,38 @@ BEGIN
 
 		insert into #hashResult
 		select 'Hybrid_' + @alg, cpu_time - @startCpu from sys.dm_exec_requests where session_id = @@SPID;
+
+		update h 
+		set h.processed = h.processed + 1 
+		from #hashAlg h 
+		where h.algorithm = @alg;
+
+	END
+END
+
+--reset algorithms for next test
+update #hashAlg set processed = 0;
+delete from #hashAlg where algorithm not like 'MD5';
+
+/*****Run tests on fn_repl_hash_binary*****/
+while exists (Select 1 from #hashAlg where processed <> @processGoal)
+BEGIN
+
+	select @minProcessed = min(processed) from #hashAlg;
+
+	while exists (select 1 from #hashAlg where processed <> (@minProcessed + 1))
+	BEGIN
+
+		select top 1 @alg = algorithm from #hashAlg where processed = @minProcessed;
+		
+		declare @outputRepl as table ( o varbinary(8000) );
+
+		select @startCpu = cpu_time from sys.dm_exec_requests where session_id = @@SPID;
+		insert into @outputRepl
+		select master.sys.fn_repl_hash_binary(convert(varbinary(max),Value)) from dbo.TestValuesSub8000;
+
+		insert into #hashResult
+		select 'Repl_' + @alg, cpu_time - @startCpu from sys.dm_exec_requests where session_id = @@SPID;
 
 		update h 
 		set h.processed = h.processed + 1 
